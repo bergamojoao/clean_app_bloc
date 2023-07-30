@@ -1,6 +1,8 @@
-import 'package:clean_app/src/features/auth/data/services/local_auth_service.dart';
+import 'package:clean_app/src/features/auth/data/services/auth_service_api.dart';
 import 'package:clean_app/src/features/auth/interactor/blocs/auth_bloc.dart';
+import 'package:clean_app/src/features/auth/interactor/blocs/signup_bloc.dart';
 import 'package:clean_app/src/features/auth/interactor/services/auth_service.dart';
+import 'package:clean_app/src/features/auth/ui/signup_page.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:modular_bloc_bind/modular_bloc_bind.dart';
 
@@ -10,13 +12,15 @@ import 'home/ui/home_page.dart';
 class AppModule extends Module {
   @override
   List<Bind<Object>> get binds => [
-        Bind.factory<AuthService>((i) => LocalAuthService()),
+        Bind.factory<AuthService>((i) => AuthServiceApi()),
         BlocBind.singleton((i) => AuthBloc(i())),
+        BlocBind.singleton((i) => SignupBloc(i())),
       ];
 
   @override
   List<ModularRoute> get routes => [
         ChildRoute('/', child: (_, __) => const HomePage()),
         ChildRoute('/login', child: (_, __) => const LoginPage()),
+        ChildRoute('/signup', child: (_, __) => const SignupPage()),
       ];
 }

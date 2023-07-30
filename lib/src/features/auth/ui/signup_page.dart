@@ -1,37 +1,52 @@
-import 'package:clean_app/src/features/auth/interactor/blocs/auth_bloc.dart';
-import 'package:clean_app/src/features/auth/interactor/events/auth__events.dart';
+import 'package:clean_app/src/features/auth/interactor/blocs/signup_bloc.dart';
+import 'package:clean_app/src/features/auth/interactor/dtos/signup_dto.dart';
+import 'package:clean_app/src/features/auth/interactor/events/signup_events.dart';
 import 'package:clean_app/src/features/auth/interactor/states/auth_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class SignupPage extends StatefulWidget {
+  const SignupPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignupPage> createState() => _SignupPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  var email = '';
-  var password = '';
+class _SignupPageState extends State<SignupPage> {
+  var signupDTO = SignupDTO(
+    name: '',
+    email: '',
+    password: '',
+  );
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.watch<AuthBloc>();
+    final bloc = context.watch<SignupBloc>();
     final state = bloc.state;
 
     final isLoading = state is LoadingAuthState;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login Page'),
+        title: const Text('Cadastro'),
       ),
       body: Center(
         child: Column(
           children: [
             TextFormField(
+              initialValue: signupDTO.name,
               onChanged: (value) {
-                email = value;
+                signupDTO.name = value;
+              },
+              enabled: !isLoading,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Nome',
+              ),
+            ),
+            TextFormField(
+              onChanged: (value) {
+                signupDTO.email = value;
               },
               enabled: !isLoading,
               decoration: const InputDecoration(
@@ -41,30 +56,20 @@ class _LoginPageState extends State<LoginPage> {
             ),
             TextFormField(
               onChanged: (value) {
-                password = value;
+                signupDTO.password = value;
               },
               enabled: !isLoading,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Password',
+                labelText: 'Senha',
               ),
             ),
             if (isLoading) const CircularProgressIndicator(),
             if (!isLoading)
               ElevatedButton(
                 onPressed: () {
-                  final event = LoginAuthEvent(
-                    email: email,
-                    password: password,
-                  );
+                  final event = SubmitSignupEvent(signupDTO: signupDTO);
                   bloc.add(event);
-                },
-                child: const Text('Login'),
-              ),
-            if (!isLoading)
-              ElevatedButton(
-                onPressed: () {
-                  Modular.to.pushNamed('/signup');
                 },
                 child: const Text('Cadastrar-se'),
               )

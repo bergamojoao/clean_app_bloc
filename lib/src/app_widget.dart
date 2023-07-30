@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:clean_app/src/features/auth/interactor/blocs/auth_bloc.dart';
-import 'package:clean_app/src/features/auth/interactor/events/auth__events.dart';
 import 'package:clean_app/src/features/auth/interactor/states/auth_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -28,7 +27,7 @@ class _MainAppState extends State<MainApp> {
         }
       },
     );
-    context.read<AuthBloc>().add(CheckAuthEvent());
+    // context.read<AuthBloc>().add(CheckAuthEvent());
   }
 
   @override

@@ -1,20 +1,42 @@
 import 'dart:developer';
 
-import 'package:clean_app/src/core/utils/api_services.dart';
-import 'package:clean_app/src/features/auth/interactor/entities/user_entity.dart';
-import 'package:clean_app/src/features/auth/interactor/states/signup_state.dart';
+import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/utils/api_services.dart';
 import '../../interactor/dtos/signup_dto.dart';
+import '../../interactor/entities/user_entity.dart';
 import '../../interactor/services/auth_service.dart';
 import '../../interactor/states/auth_state.dart';
+import '../../interactor/states/signup_state.dart';
 
 class AuthServiceApi implements AuthService {
   final api = ApiService.api;
 
   @override
-  Future<AuthState> getUser() {
-    throw UnimplementedError();
+  Future<AuthState> getUser() async {
+    try {
+      var prefs = await SharedPreferences.getInstance();
+      var token = prefs.getString('token');
+      if (token != null) {
+        var response = await api.get(
+          '/auth/status',
+          options: Options(headers: {'Authorization': 'Bearer $token'}),
+        );
+        if (response.statusCode == 200) {
+          var prefs = await SharedPreferences.getInstance();
+          prefs.setString('token', response.data['token']);
+          return LoggedInAuthState(UserEntity(
+            name: response.data['name'],
+            email: response.data['email'],
+            token: response.data['token'],
+          ));
+        }
+      }
+    } catch (e) {
+      return const LoggedOutAuthState();
+    }
+    return const LoggedOutAuthState();
   }
 
   @override
@@ -31,10 +53,17 @@ class AuthServiceApi implements AuthService {
       if (response.statusCode == 201) {
         var prefs = await SharedPreferences.getInstance();
         prefs.setString('token', response.data['token']);
-        return LoggedInAuthState(UserEntity(token: response.data['token']));
+        return LoggedInAuthState(UserEntity(
+          name: response.data['name'],
+          email: response.data['email'],
+          token: response.data['token'],
+        ));
       }
-    } catch (e) {
+    } on DioException catch (e) {
       log(e.toString());
+      return const FailedAuthState('Usuário ou senha inválida');
+    } catch (e) {
+      return FailedAuthState(e.toString());
     }
 
     return const LoggedOutAuthState();
@@ -58,8 +87,12 @@ class AuthServiceApi implements AuthService {
       if (response.statusCode == 201) {
         return SubmitedSignupState(signupDTO);
       }
-    } catch (e) {
+    } on DioException catch (e) {
       log(e.toString());
+      return FailedSignupState(
+        ApiService.apiErrorMessagesToString(e.response) ??
+            'Erro ao se cadastrar.',
+      );
     }
     return const FailedSignupState('Erro ao se cadastrar.');
   }

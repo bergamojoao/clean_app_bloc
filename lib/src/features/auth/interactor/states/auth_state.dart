@@ -14,6 +14,11 @@ class LoggedOutAuthState implements AuthState {
   const LoggedOutAuthState();
 }
 
+class FailedAuthState implements AuthState {
+  final String message;
+  const FailedAuthState(this.message);
+}
+
 class LoadingAuthState implements AuthState {
   const LoadingAuthState();
 }

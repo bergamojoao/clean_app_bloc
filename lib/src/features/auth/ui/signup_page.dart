@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:clean_app/src/features/auth/interactor/blocs/signup_bloc.dart';
 import 'package:clean_app/src/features/auth/interactor/dtos/signup_dto.dart';
 import 'package:clean_app/src/features/auth/interactor/events/signup_events.dart';
 import 'package:clean_app/src/features/auth/interactor/states/auth_state.dart';
+import 'package:clean_app/src/features/auth/interactor/states/signup_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -13,11 +16,42 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
+  late final StreamSubscription _subscription;
+
   var signupDTO = SignupDTO(
     name: '',
     email: '',
     password: '',
   );
+
+  @override
+  void initState() {
+    super.initState();
+    _subscription = context.read<SignupBloc>().stream.listen(
+      (state) {
+        if (state is FailedSignupState) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              content: Text(state.message),
+              actions: [
+                TextButton(
+                  onPressed: () => Modular.to.pop(),
+                  child: const Text('OK'),
+                )
+              ],
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

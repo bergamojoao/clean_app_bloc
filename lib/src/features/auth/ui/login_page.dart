@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:clean_app/src/features/auth/interactor/blocs/auth_bloc.dart';
-import 'package:clean_app/src/features/auth/interactor/events/auth__events.dart';
+import 'package:clean_app/src/features/auth/interactor/events/auth_events.dart';
 import 'package:clean_app/src/features/auth/interactor/states/auth_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:validatorless/validatorless.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,8 +15,39 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  late final StreamSubscription _subscription;
+
   var email = '';
   var password = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _subscription = context.read<AuthBloc>().stream.listen(
+      (state) {
+        if (state is FailedAuthState) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              content: Text(state.message),
+              actions: [
+                TextButton(
+                  onPressed: () => Modular.to.pop(),
+                  child: const Text('OK'),
+                )
+              ],
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,53 +56,67 @@ class _LoginPageState extends State<LoginPage> {
 
     final isLoading = state is LoadingAuthState;
 
+    final formKey = GlobalKey<FormState>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Login Page'),
       ),
       body: Center(
-        child: Column(
-          children: [
-            TextFormField(
-              onChanged: (value) {
-                email = value;
-              },
-              enabled: !isLoading,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Email',
-              ),
-            ),
-            TextFormField(
-              onChanged: (value) {
-                password = value;
-              },
-              enabled: !isLoading,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Password',
-              ),
-            ),
-            if (isLoading) const CircularProgressIndicator(),
-            if (!isLoading)
-              ElevatedButton(
-                onPressed: () {
-                  final event = LoginAuthEvent(
-                    email: email,
-                    password: password,
-                  );
-                  bloc.add(event);
+        child: Form(
+          key: formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                onChanged: (value) {
+                  email = value;
                 },
-                child: const Text('Login'),
+                enabled: !isLoading,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Email',
+                ),
+                validator: Validatorless.multiple([
+                  Validatorless.required('Email obrigatório'),
+                  Validatorless.email('Email inválido'),
+                ]),
               ),
-            if (!isLoading)
-              ElevatedButton(
-                onPressed: () {
-                  Modular.to.pushNamed('/signup');
+              TextFormField(
+                onChanged: (value) {
+                  password = value;
                 },
-                child: const Text('Cadastrar-se'),
-              )
-          ],
+                enabled: !isLoading,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Password',
+                ),
+                validator: Validatorless.multiple([
+                  Validatorless.required('Senha inválida'),
+                ]),
+              ),
+              if (isLoading) const CircularProgressIndicator(),
+              if (!isLoading)
+                ElevatedButton(
+                  onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                      final event = LoginAuthEvent(
+                        email: email,
+                        password: password,
+                      );
+                      bloc.add(event);
+                    }
+                  },
+                  child: const Text('Login'),
+                ),
+              if (!isLoading)
+                ElevatedButton(
+                  onPressed: () {
+                    Modular.to.pushNamed('/signup');
+                  },
+                  child: const Text('Cadastrar-se'),
+                )
+            ],
+          ),
         ),
       ),
     );

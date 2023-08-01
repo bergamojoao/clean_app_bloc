@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../events/auth__events.dart';
+import '../events/auth_events.dart';
 import '../services/auth_service.dart';
 import '../states/auth_state.dart';
 
@@ -29,7 +29,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   void _checkAuthEvent(CheckAuthEvent event, emit) async {
-    emit(const LoadingAuthState());
+    // emit(const LoadingAuthState());
     final newState = await service.getUser();
     emit(newState);
   }

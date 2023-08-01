@@ -1,4 +1,4 @@
-import 'package:clean_app/src/features/auth/interactor/events/auth__events.dart';
+import 'package:clean_app/src/features/auth/interactor/events/auth_events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 

@@ -12,6 +12,8 @@ class LoginAuthEvent implements AuthEvent {
   });
 }
 
+class GoogleLoginAuthEvent implements AuthEvent {}
+
 class LogoutAuthEvent implements AuthEvent {}
 
 class CheckAuthEvent implements AuthEvent {}

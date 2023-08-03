@@ -10,7 +10,7 @@ import '../../interactor/services/auth_service.dart';
 import '../../interactor/states/auth_state.dart';
 import '../../interactor/states/signup_state.dart';
 
-class AuthServiceApi implements AuthService {
+class AuthServiceImpl implements AuthService {
   final api = ApiService.api;
 
   @override

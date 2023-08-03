@@ -62,10 +62,12 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         title: const Text('Login Page'),
       ),
-      body: Center(
-        child: Form(
-          key: formKey,
+      body: Form(
+        key: formKey,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextFormField(
                 onChanged: (value) {
@@ -81,39 +83,59 @@ class _LoginPageState extends State<LoginPage> {
                   Validatorless.email('Email inválido'),
                 ]),
               ),
+              const SizedBox(height: 20),
               TextFormField(
                 onChanged: (value) {
                   password = value;
                 },
                 enabled: !isLoading,
+                obscureText: true,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Password',
+                  labelText: 'Senha',
                 ),
                 validator: Validatorless.multiple([
                   Validatorless.required('Senha inválida'),
                 ]),
               ),
+              const SizedBox(height: 20),
               if (isLoading) const CircularProgressIndicator(),
               if (!isLoading)
-                ElevatedButton(
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      final event = LoginAuthEvent(
-                        email: email,
-                        password: password,
-                      );
-                      bloc.add(event);
-                    }
-                  },
-                  child: const Text('Login'),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (formKey.currentState!.validate()) {
+                        final event = LoginAuthEvent(
+                          email: email,
+                          password: password,
+                        );
+                        bloc.add(event);
+                      }
+                    },
+                    child: const Text('Entrar'),
+                  ),
                 ),
               if (!isLoading)
-                ElevatedButton(
-                  onPressed: () {
-                    Modular.to.pushNamed('/signup');
-                  },
-                  child: const Text('Cadastrar-se'),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final event = GoogleLoginAuthEvent();
+                      bloc.add(event);
+                    },
+                    child: const Text('Login com o Google'),
+                  ),
+                ),
+              if (!isLoading)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Modular.to.pushNamed('/signup');
+                    },
+                    child: const Text('Cadastrar-se'),
+                  ),
                 )
             ],
           ),
